@@ -1,14 +1,23 @@
 apply plugin: 'com.android.application'
 
+
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
+
 
     // 设置int检查点
     lintOptions {
 
         // 设置是否打断编译
         abortOnError false
+
+        //release build 是否检查
+        checkReleaseBuilds false
 
         // turn off checking the given issue id's
         disable 'TypographyFractions', 'TypographyQuotes'
@@ -17,7 +26,7 @@ android {
         enable 'RtlHardcoded', 'RtlCompat', 'RtlEnabled'
 
         // check *only* the given issue id's
-        check 'NewApi', 'InlinedApi', 'AndroidLintAllowBackup'
+        check 'NewApi', 'InlinedApi'
     }
 
     defaultConfig {
@@ -26,6 +35,9 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        // dex突破65535的限制
+        multiDexEnabled true
     }
 
     /**
@@ -70,6 +82,8 @@ android {
 //        }
     }
 
+
+
     buildTypes {
 
         //  debug 版本打的包名加后缀.debug
@@ -83,10 +97,23 @@ android {
 
         release {
             //是否混淆
-            minifyEnabled false
+            minifyEnabled true
             // 是否压缩资源文件
             shrinkResources true
+            // 混淆后的zip优化, 默认true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def outputFile = output.outputFile
+                    if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                        // 输出apk名称为Meizhi_v1.0_2015-01-15_wandoujia.apk
+                        def fileName = "Meizhi_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+                        output.outputFile = new File(outputFile.parent, fileName)
+                    }
+                }
+            }
         }
     }
 
@@ -100,11 +127,17 @@ android {
 
         playstore {
             applicationId = 'com.lrchao.testgradle.playstore'
+            //resValue "string", "app_name", "app_name_playstore"
+
+            // 修改manifest文件里的内容
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "playstore"]
         }
-//
-//        hiapk {
-//            applicationId='com.lrchao.testgradle.amazonappstore'
-//        }
+
+        hiapk {
+            applicationId='com.lrchao.testgradle.amazonappstore'
+            // 动态修改string.xml，but, string.xml就不能声明app_name了
+            //resValue "string", "app_name", "app_name_hiapk"
+        }
 
     }
 
@@ -117,6 +150,8 @@ android {
         if (names.contains("fakeData") && variant.buildType.name == "release") {
             variant.ignore = true
         }
+
+
     }
 }
 
