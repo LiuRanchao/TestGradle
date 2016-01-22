@@ -17,5 +17,5 @@ allows building all APKs for a given flavor. For instance assembleFlavor1 will b
 gradle生成目录
 美团打包方式，是否可以修改包名，修改应用名，修改mainfest.xml中第三方参数
 build.gradle 拆分
-gradle 能做什么插件？ http://unclechen.github.io/2015/11/17/%E8%87%AA%E5%AE%9A%E4%B9%89Android%20Gradle%E6%8F%92%E4%BB%B6/
+gradle 能做什么插件？ 
 
