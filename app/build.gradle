@@ -4,6 +4,22 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
+    // 设置int检查点
+    lintOptions {
+
+        // 设置是否打断编译
+        abortOnError false
+
+        // turn off checking the given issue id's
+        disable 'TypographyFractions', 'TypographyQuotes'
+
+        // turn on the given issue id's
+        enable 'RtlHardcoded', 'RtlCompat', 'RtlEnabled'
+
+        // check *only* the given issue id's
+        check 'NewApi', 'InlinedApi', 'AndroidLintAllowBackup'
+    }
+
     defaultConfig {
         applicationId "com.lrchao.testgradle"
         minSdkVersion 9
@@ -11,17 +27,113 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    buildTypes {
+
+    /**
+     * 设置目录结构
+     */
+    sourceSets {
+        main {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs = ['src/main/java']
+            resources.srcDirs = ['src/main/res']
+//            aidl.srcDirs = ['src']
+//            renderscript.srcDirs = ['src']
+//            res.srcDirs = ['res']
+//            assets.srcDirs = ['assets']
+        }
+
+        //androidTest.setRoot('tests')
+    }
+
+    // 签名, 要在buildTypes之上，否则buildTypes找不到对应的myConfig
+    signingConfigs {
+
         release {
+            storeFile file('android.jks')
+            storePassword '19860926r    '
+            keyAlias 'KevinLiu'
+            keyPassword '19860926r'
+        }
+
+        myConfig {
+            storeFile file('android.jks')
+            storePassword '19860926r    '
+            keyAlias 'KevinLiu'
+            keyPassword '19860926r'
+        }
+
+//        debug {
+//            storeFile file('android.jks')
+//            storePassword '19860926r    '
+//            keyAlias 'KevinLiu'
+//            keyPassword '19860926r'
+//        }
+    }
+
+    buildTypes {
+
+        //  debug 版本打的包名加后缀.debug
+        debug {
+            applicationIdSuffix ".debug"
+        }
+
+//        foo {
+//            signingConfig signingConfigs.myConfig
+//        }
+
+        release {
+            //是否混淆
             minifyEnabled false
+            // 是否压缩资源文件
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    /**
+     * 打不同的渠道包
+     * Build Type + Product Flavor = Build Variant
+     * 可以设置不同的SourceSet
+     *
+     */
+    productFlavors {
+
+        playstore {
+            applicationId = 'com.lrchao.testgradle.playstore'
+        }
+//
+//        hiapk {
+//            applicationId='com.lrchao.testgradle.amazonappstore'
+//        }
+
+    }
+
+    /**
+     * 添加过滤，如果flavors的名字为fakeData，并且buildType为release，则不输出此类型的
+     */
+    variantFilter { variant ->
+        def names = variant.flavors*.name
+
+        if (names.contains("fakeData") && variant.buildType.name == "release") {
+            variant.ignore = true
         }
     }
 }
 
 dependencies {
+    //依赖本地工程，include ':app', ':mylibrary'
+    compile project(':mylibrary')
+
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
+
+    //compile: main application
+    //androidTestCompile: test application
+    //debugCompile: debug Build Type
+    //releaseCompile: release Build Type.
+
+    // playstore Flavors 依赖
+    playstoreCompile "com.android.support:appcompat-v7:23.1.1"
 }
