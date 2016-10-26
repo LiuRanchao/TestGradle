@@ -139,6 +139,14 @@ android {
             //resValue "string", "app_name", "app_name_hiapk"
         }
 
+        //        productFlavors.all { flavor ->
+//            flavor.manifestPlaceholders = [
+//                    push_appid    : properties.getProperty("PUSH_APPID").toString(),
+//                    push_appkey   : properties.getProperty("PUSH_APPKEY").toString(),
+//                    push_appsecret: properties.getProperty("PUSH_APPSECRET".toString())
+//            ]
+//        }
+
     }
 
     /**
